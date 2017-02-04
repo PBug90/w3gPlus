@@ -1,0 +1,132 @@
+library W3GPlus initializer init requires MMD
+	globals
+		private integer execution_count
+		private integer elapsed_seconds
+	endglobals
+
+	private function action_onUnitTrained takes nothing returns nothing
+
+		//check unit type. if its a hero, we can fire the hero_level event to indicate the exact time when the hero hit the dance floor
+		if (IsUnitType(GetTrainedUnit(),UNIT_TYPE_HERO)==true) then
+			call MMD_LogEvent3("hero_level",I2S(GetPlayerId(GetOwningPlayer(GetTrainedUnit()))),I2S(GetUnitTypeId(GetTrainedUnit())),I2S(elapsed_seconds ))
+		else
+			call MMD_LogEvent2("unit_created",I2S(GetPlayerId(GetOwningPlayer(GetTrainedUnit()))),I2S(GetUnitTypeId(GetTrainedUnit())))
+		endif
+		
+
+	endfunction
+	
+	private function action_onHeroSkilled takes nothing returns nothing
+		local unit u = GetTriggerUnit()
+	
+		call MMD_LogEvent3("hero_skill",I2S(GetPlayerId(GetOwningPlayer(u))),I2S(GetUnitTypeId(u)),I2S( GetLearnedSkill()))
+		
+		set u = null
+	endfunction
+	
+	private function action_onUpgradeFinished takes nothing returns nothing
+		call MMD_LogEvent3("upgrade_finished",I2S(GetPlayerId(GetOwningPlayer(GetTriggerUnit()))),I2S(GetUnitTypeId(GetTriggerUnit())),I2S(elapsed_seconds))
+	endfunction
+	
+	private function action_onResearchFinished takes nothing returns nothing
+		call MMD_LogEvent3("research_finished",I2S(GetPlayerId(GetOwningPlayer(GetTriggerUnit()))),I2S(GetResearched()),I2S(GetPlayerTechCount(GetOwningPlayer(GetTriggerUnit()),GetResearched(),true))+":"+I2S(elapsed_seconds))
+	endfunction
+	
+	private function action_onHeroLevelUp takes nothing returns nothing
+		call MMD_LogEvent3("hero_level",I2S(GetPlayerId(GetOwningPlayer(GetTriggerUnit()))),I2S(GetUnitTypeId(GetTriggerUnit())),I2S(elapsed_seconds ))
+	endfunction
+	
+	function action_resourceTimerTimeout takes nothing returns nothing
+		local integer i  = 0
+		loop
+			exitwhen i > 11
+			if GetPlayerSlotState(Player(i)) == PLAYER_SLOT_STATE_PLAYING and not IsPlayerObserver(Player(i)) then
+				call MMD_LogEvent3("gold_mined_total",I2S(i),I2S(GetPlayerScore(Player(i),PLAYER_SCORE_GOLD_MINED_TOTAL)),I2S(execution_count))
+				call MMD_LogEvent3("gold_mined_upkeep",I2S(i),I2S(GetPlayerScore(Player(i),PLAYER_SCORE_GOLD_MINED_UPKEEP)),I2S(execution_count))
+				call MMD_LogEvent3("lumber_mined",I2S(i),I2S(GetPlayerScore(Player(i),PLAYER_SCORE_LUMBER_TOTAL)),I2S(execution_count))
+				//call BJDebugMsg(GetPlayerName(Player(i)))
+			endif
+			set i = i +1
+		endloop
+		set execution_count = execution_count + 1
+	endfunction	
+	
+	private function action_increaseElapsedSeconds takes nothing returns nothing
+		set elapsed_seconds = elapsed_seconds + 1
+	endfunction
+	
+	//DefineEvent2(name, format, argName1, argName2)
+	private function init2 takes nothing returns nothing
+		local integer i = 0
+		call MMD_DefineEvent2("unit_created","{0} {1}","pid","uid")
+		call MMD_DefineEvent3("gold_mined_total","{0} {1}","pid","amount","exec_count")
+		call MMD_DefineEvent3("gold_mined_upkeep","{0} {1}","pid","amount","exec_count")
+		call MMD_DefineEvent3("lumber_mined","{0} {1}","pid","amount","exec_count")
+		call MMD_DefineEvent3("hero_skill","{0} {1} {2}","pid","uid","skillid")
+		call MMD_DefineEvent3("hero_level","{0} {1} {2}","pid","uid","secelapsed")
+		call MMD_DefineEvent3("upgrade_finished","{0} {1} {2}","pid","unit_id","secelapsed")
+		call MMD_DefineEvent3("research_finished","{0} {1} {2}","pid","researchid","researchlvl:secelapsed")
+		
+		call MMD_DefineValue("race",MMD_TYPE_STRING,MMD_GOAL_NONE,MMD_SUGGEST_NONE)
+		loop
+			exitwhen i > 11
+				if (not IsPlayerObserver(Player(i))) and GetPlayerSlotState(Player(i))==PLAYER_SLOT_STATE_PLAYING then
+					if (GetPlayerRace(Player(i)))==RACE_HUMAN then
+						call MMD_UpdateValueString("race",Player(i),"human")
+					elseif (GetPlayerRace(Player(i)))==RACE_ORC then
+						call MMD_UpdateValueString("race",Player(i),"orc")
+					elseif (GetPlayerRace(Player(i)))==RACE_UNDEAD then
+						call MMD_UpdateValueString("race",Player(i),"undead")
+					elseif (GetPlayerRace(Player(i)))==RACE_NIGHTELF then
+						call MMD_UpdateValueString("race",Player(i),"nightelf")
+					endif
+				
+					
+				endif
+			
+			set i = i + 1
+		endloop
+	endfunction
+	
+	
+
+	private function init takes nothing returns nothing
+		local trigger onCreate = CreateTrigger()
+		local trigger onHeroAbilityLearned = CreateTrigger()
+		local trigger delay = CreateTrigger()
+		local trigger resourcePeriodic = CreateTrigger()
+		local trigger onUpgradeFinished = CreateTrigger()
+		local trigger onResearchFinished = CreateTrigger()
+		local trigger secondsPeriodic = CreateTrigger()
+		local trigger onHeroLevelUp = CreateTrigger()
+		
+		set execution_count = 1
+		set elapsed_seconds = 0
+		
+		call TriggerRegisterAnyUnitEventBJ(onHeroLevelUp,EVENT_PLAYER_HERO_LEVEL)
+		call TriggerAddAction(onHeroLevelUp,function action_onHeroLevelUp)
+		
+		call TriggerRegisterAnyUnitEventBJ(onUpgradeFinished,EVENT_PLAYER_UNIT_UPGRADE_FINISH)
+		call TriggerAddAction(onUpgradeFinished,function action_onUpgradeFinished)
+		
+		call TriggerRegisterAnyUnitEventBJ(onResearchFinished,EVENT_PLAYER_UNIT_RESEARCH_FINISH)
+		call TriggerAddAction(onResearchFinished,function action_onResearchFinished)		
+		
+		call TriggerRegisterAnyUnitEventBJ(onCreate,EVENT_PLAYER_UNIT_TRAIN_FINISH)
+		call TriggerAddAction(onCreate,function action_onUnitTrained)
+		
+		call TriggerRegisterAnyUnitEventBJ(onHeroAbilityLearned,EVENT_PLAYER_HERO_SKILL)
+		call TriggerAddAction(onHeroAbilityLearned,function action_onHeroSkilled)		
+		
+		call TriggerRegisterTimerEvent(delay,1.,false)
+		call TriggerAddAction(delay,function init2)
+		
+		call TriggerRegisterTimerEvent(resourcePeriodic,60,true)
+		call TriggerAddAction(resourcePeriodic,function action_resourceTimerTimeout)		
+		
+		call TriggerRegisterTimerEvent(secondsPeriodic,1,true)
+		call TriggerAddAction(secondsPeriodic,function action_increaseElapsedSeconds)			
+
+	endfunction
+
+endlibrary
