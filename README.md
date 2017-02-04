@@ -2,7 +2,7 @@
 A new standard for Warcraft 3 Replays. Allows tracking more standard-game-metadata via Hostbots and with replay files. Parsers can then utilize this meta data from replay files and display valuable, reliable information about the game.
 
 
-!(sample_resource_graph.png?raw=true "Example image showing the gold resources being tracked over time in a Human (red) vs Undead (blue) game.")
+![resource sample graph](sample_resource_graph.png?raw=true "Example image showing the gold resources being tracked over time in a Human (red) vs Undead (blue) game.")
 
 ## Why?
 Replay parsers can only evaluate player input actions, and since even redundant "spam" actions get tracked they naturally have a hard time figuring out what really happened in a game. Also, the game lacks features for tracking interesting additional statistics like resources over time. This standard allows tracking that kind of data in a reliable and persistent way.
