@@ -423,17 +423,18 @@ class replay {
                         //echo "Detected a meta action";
                         $n++;
                         
-                       
+                       // echo(sprintf('Hex von n: %02X<br>',ord($actionblock[$n])));
                         $pos = strpos($actionblock,"\0",$n);
                         $value = trim(substr($actionblock, $n,$pos-$n));
                        
                         
-                        
+                        //echo "n increased by ".($pos-$n+1)."<br>";
                         $n=$n+($pos-$n)+1;
-
+                        //echo(sprintf('Hex von n: %02X<br>',ord($actionblock[$n])));
+                        //echo bin2hex($value)."<br>";
                         $value = str_replace("\0", "", $value);
-         
-                        //check if we find the custom data type
+                        //echo "value: ".$value."<br>";
+                        //check if we find our custom data type
                         if (trim($value) === "MMD.Dat"){
                           //check for sequence number
                             
@@ -441,33 +442,37 @@ class replay {
                             $pos = strpos($actionblock,"\0",$n);
                             $value = substr($actionblock, $n,$pos-$n);
                             $n= $n+($pos-$n)+1;   
+                          //  echo "n increased by ".($pos-$n+1)."<br>";
+                            //echo(sprintf('Hex von n: %02X<br>',ord($actionblock[$n])));
                             $value = explode(':',$value);
                             
                           //check for actual content
                             $pos = strpos($actionblock,"\0",$n);
                             $value = substr($actionblock, $n,$pos-$n);
-                
+                          //  echo "n increased by ".($pos-$n+1)."<br>";
                             $n=$n+$pos-$n+1;
                             $value = str_replace("\0", "", $value);
                             
-                         
+                           // echo(sprintf('Hex von n: %02X<br>',ord($actionblock[$n])));
                        
                             
-                            
+                            //echo $value."<br>";
                             $value = explode(" ",$value,10);
                             
                             if (($value[0]) === "Event"){
                                 //We had an event, lets check it
-                                
-                                //extract player id
                                 $pid= $value[2];
                                 
                                 switch ($value[1]){
                                     case "unit_created":
+                                      
+                                       // if (!in_array($value[2],$this->arm["player"][$pid]))
+                                        //    $this->arm["player"][$pid][$value[2]] = 0;
                                         $wc3unitcode= $this->hex2str(dechex ($value[3]));
                                         $this->arm["player"][$pid]["units_created"][$wc3unitcode]++;
                                         break;
                                     case "hero_skill":
+                                       
                                         $wc3herocode= $this->hex2str(dechex ($value[3]));
                                         $wc3abilcode= $this->hex2str(dechex ($value[4]));
                                         $this->arm["player"][$pid]["hero_skills"][$wc3herocode][$wc3abilcode]++;
@@ -477,9 +482,13 @@ class replay {
                                         $this->arm["player"][$pid]["hero_level"][] = array("hero_id"=>$wc3herocode,"time"=>$value[4],"name"=>substr(convert_itemid($wc3herocode), 2),"name_trim"=>str_replace(' ', '',  substr(convert_itemid($wc3herocode),2))); 
                                         break;                                
                                     case "gold_mined_total":
+                                        //echo $value."<br>";
+                                        //echo "gold_mined_total pid:".$pid." exec: ".$value[4]." val: ".$value[3]."<br>";
                                         $this->arm["player"][$pid]["gold_mined_total"][] =array("exec"=>$value[4],"val"=>$value[3]);
                                         break;
                                     case "gold_mined_upkeep":
+                                        //echo $value."<br>";
+                                        //echo "gold_mined_upkeep pid:".$pid." exec: ".$value[4]." val: ".$value[3]."<br>";
                                         $this->arm["player"][$pid]["gold_mined_upkeep"][] =array("exec"=>$value[4],"val"=>$value[3]);
                                         break;                                    
                                     case "upgrade_finished":
@@ -507,6 +516,8 @@ class replay {
                                                         
                         }
                         $n+=4;
+                       // echo(sprintf('Hex von n: %02X<br>',ord($actionblock[$n])));
+
                         break;
                   
 							 
@@ -977,7 +988,7 @@ class replay {
 	
 					default:
 						$temp = '';
-						//echo "error!";
+						echo "error!";
 						for ($i=3; $i<$n; $i++) { // first 3 bytes are player ID and length
 							$temp .= sprintf('%02X', ord($actionblock{$i})).' ';
 						}
@@ -1083,10 +1094,10 @@ class replay {
 	}
     
     function generateJSONDataStructure(){
-        $teams = array();
+          $teams = array();
         $teams_simple = array();
 		// players time cleanup
-		foreach ($this->players as $player) {
+		foreach ($this->players as $id=>$player) {
 			if (!$player['time']) {
 				$this->players[$player['player_id']]['time'] = $this->header['length'];
                 
@@ -1172,7 +1183,10 @@ class replay {
             
             unset ($player["heroes"]["order"]);
             foreach ($player["heroes"] as $heroname => $properties){
-
+                if (strlen($heroname)<=2){
+                    unset ($this->players[$id]["heroes"][$heroname]);
+                    continue;
+                }
                 $newOrder = array();
                 $newAbilitys = array();
                 foreach ($properties["abilities"]["order"] as $time => $abilname){
