@@ -1185,8 +1185,10 @@ class replay {
             
             unset ($player["heroes"]["order"]);
             foreach ($player["heroes"] as $heroname => $properties){
-                if (strlen($heroname)<=2)
+                if (strlen($heroname)<=2){
+                    unset ($this->players[$id]["heroes"][$heroname]);
                     continue;
+                }
                 $newOrder = array();
                 $newAbilitys = array();
                 foreach ($properties["abilities"]["order"] as $time => $abilname){
