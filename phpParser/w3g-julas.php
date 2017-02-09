@@ -1032,7 +1032,7 @@ class replay {
         
         */
         $allActionStrings = array("Right click", "Select / deselect","Select group hotkey","Assign group hotkey","Use ability","Basic commands","Build / train","Enter build submenu",
-                                  "Enter hero\'s abilities submenu","Select subgroup","Give item / drop item","Remove unit from queue","Esc pressed");
+                                  "Enter hero\'s abilities submenu","Select subgroup","Give item / drop item","Remove unit from queue","ESC pressed");
         
         
         
@@ -1049,16 +1049,18 @@ class replay {
 				// whole team 12 are observers/referees
 				if ($this->players[$player_id]['team'] != 12 && $this->players[$player_id]['computer'] == 0) {
 					$this->players[$player_id]['apm'] = $this->players[$player_id]['actions'] / $this->players[$player_id]['time'] * 60000;
-				}
-                
+                    
                 //normalize player action details so that all players have all types of actions in their data even if they never did one or many of them in the actual game
-                foreach (array_diff(array_keys($info["actions_details"]),$allActionStrings) as $key){
+                foreach (array_diff($allActionStrings,array_keys($info["actions_details"])) as $key){
                     $this->players[$player_id]['actions_details'][$key] = 0;
                 }
-                asort($this->players[$player_id]["actions_details"]);
+                ksort($this->players[$player_id]["actions_details"]);                
+                    
+				}
+                
 			}
 		}
-	
+	      
 		// splitting teams
 		foreach ($this->players as $player_id=>$info) {
 			if (isset($info['team'])) { // to eliminate zombie-observers caused by Waaagh!TV
@@ -1097,7 +1099,7 @@ class replay {
           $teams = array();
         $teams_simple = array();
 		// players time cleanup
-		foreach ($this->players as $id=>$player) {
+		foreach ($this->players as $player) {
 			if (!$player['time']) {
 				$this->players[$player['player_id']]['time'] = $this->header['length'];
                 
@@ -1183,10 +1185,8 @@ class replay {
             
             unset ($player["heroes"]["order"]);
             foreach ($player["heroes"] as $heroname => $properties){
-                if (strlen($heroname)<=2){
-                    unset ($this->players[$id]["heroes"][$heroname]);
+                if (strlen($heroname)<=2)
                     continue;
-                }
                 $newOrder = array();
                 $newAbilitys = array();
                 foreach ($properties["abilities"]["order"] as $time => $abilname){
