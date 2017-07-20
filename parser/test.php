@@ -4,7 +4,7 @@ error_reporting(E_ERROR, E_NOTICE );
 
 $parser =new ReplayParser();
 $cwd = getcwd();
-$directory = $cwd.'/replays/';
+$directory = $cwd.'/parser/replays/';
 $scanned_directory = array_diff(scandir($directory), array('..', '.'));
 foreach ($scanned_directory as $file){
   echo $directory.$file."\n";
