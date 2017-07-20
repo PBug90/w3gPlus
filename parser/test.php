@@ -1,6 +1,6 @@
 <?php
 include "ReplayParser.php";
-error_reporting(E_ERROR, E_NOTICE );
+error_reporting(E_ERROR);
 
 $parser =new ReplayParser();
 $cwd = getcwd();
