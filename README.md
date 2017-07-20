@@ -1,3 +1,4 @@
+[![Build Status](https://travis-ci.org/anXieTyPB/w3gPlus.svg?branch=master)](https://travis-ci.org/anXieTyPB/w3gPlus)
 # w3gPlus
 A new standard for Warcraft 3 Replays. Allows tracking more standard-game-metadata via Hostbots and with replay files. Parsers can then utilize this meta data from replay files and display valuable, reliable information about the game.
 
