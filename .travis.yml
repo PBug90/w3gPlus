@@ -2,5 +2,10 @@ language: php
 php:
   - '7.0'
   - '7.1'
+  
+install:
+  # Install composer packages, will also trigger dump-autoload
+  - travis_retry composer install --no-interaction
+  
 script:
-  - phpunit .\parser\
+  - ./vendor/bin/phpunit  ./parser/
