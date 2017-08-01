@@ -331,9 +331,8 @@ class ReplayParser
             }
         }
         $return["saver"] = $this->playerIdToName[$replay_parsed->game["saver_id"]];
-
         return $return;
     }
 }
-//$parser = new ReplayParser();
-//var_dump( $parser->normalizeMap("Maps\\w3arena\\w3arena__twistedmeadows__v3.w3x"));
+$parser = new ReplayParser();
+$parser->parseReplayFile(__DIR__ . "/test/replays/1.w3g");

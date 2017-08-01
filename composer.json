@@ -1,0 +1,7 @@
+{
+    "name": "anxietypb/w3g-plus",
+    "type": "library",
+    "require": {
+        "phpunit/phpunit": "^6.2"
+    }
+}
