@@ -45,5 +45,5 @@ class ReplayParserTest extends TestCase
       $this->assertObjectHasAttribute ('chat',$data);
       $this->assertObjectHasAttribute ('w3gplus',$data);
   }
-  
+
 }
