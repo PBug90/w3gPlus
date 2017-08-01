@@ -3,8 +3,4 @@ php:
   - '7.0'
   - '7.1'
 script:
-<<<<<<< HEAD
   - phpunit .\parser\
-=======
-  - php ./parser/test.php
->>>>>>> 33bc7c11421840f4b5dd63cef6be6261afcf2677
