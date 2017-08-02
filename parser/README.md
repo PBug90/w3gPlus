@@ -1,4 +1,4 @@
-# Changes
+# Changes - OUTDATED
 
 This library should be fully compatible with existing versions, only enhancing its functionality. It adds another property called "json_parsed_full" to the PHP class object that allows retrieval of W3GPlus-Information as well as well structured output that is JSON-compatible and can be easily used with modern front end Web-Applications like AngularJS.
 
