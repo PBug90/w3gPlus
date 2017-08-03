@@ -10,7 +10,7 @@ library W3GPlus initializer init requires MMD
 		if (IsUnitType(GetTrainedUnit(),UNIT_TYPE_HERO)==true) then
 			call MMD_LogEvent3("hero_level",I2S(GetPlayerId(GetOwningPlayer(GetTrainedUnit()))),I2S(GetUnitTypeId(GetTrainedUnit())),I2S(elapsed_seconds ))
 		else
-			call MMD_LogEvent2("unit_created",I2S(GetPlayerId(GetOwningPlayer(GetTrainedUnit()))),I2S(GetUnitTypeId(GetTrainedUnit())))
+			//call MMD_LogEvent2("unit_created",I2S(GetPlayerId(GetOwningPlayer(GetTrainedUnit()))),I2S(GetUnitTypeId(GetTrainedUnit())))
 		endif
 		
 
@@ -43,8 +43,7 @@ library W3GPlus initializer init requires MMD
 			if GetPlayerSlotState(Player(i)) == PLAYER_SLOT_STATE_PLAYING and not IsPlayerObserver(Player(i)) then
 				call MMD_LogEvent3("gold_mined_total",I2S(i),I2S(GetPlayerScore(Player(i),PLAYER_SCORE_GOLD_MINED_TOTAL)),I2S(execution_count))
 				call MMD_LogEvent3("gold_mined_upkeep",I2S(i),I2S(GetPlayerScore(Player(i),PLAYER_SCORE_GOLD_MINED_UPKEEP)),I2S(execution_count))
-				call MMD_LogEvent3("lumber_mined",I2S(i),I2S(GetPlayerScore(Player(i),PLAYER_SCORE_LUMBER_TOTAL)),I2S(execution_count))
-				//call BJDebugMsg(GetPlayerName(Player(i)))
+				call MMD_LogEvent3("gold_mined_upkeep",I2S(i),I2S(GetPlayerScore(Player(i),PLAYER_SCORE_LUMBER_TOTAL)),I2S(execution_count))
 			endif
 			set i = i +1
 		endloop
@@ -58,13 +57,13 @@ library W3GPlus initializer init requires MMD
 	//DefineEvent2(name, format, argName1, argName2)
 	private function init2 takes nothing returns nothing
 		local integer i = 0
-		call MMD_DefineEvent2("unit_created","{0} {1}","pid","uid")
+		//call MMD_DefineEvent2("unit_created","{0} {1}","pid","uid")
 		call MMD_DefineEvent3("gold_mined_total","{0} {1}","pid","amount","exec_count")
 		call MMD_DefineEvent3("gold_mined_upkeep","{0} {1}","pid","amount","exec_count")
 		call MMD_DefineEvent3("lumber_mined","{0} {1}","pid","amount","exec_count")
 		call MMD_DefineEvent3("hero_skill","{0} {1} {2}","pid","uid","skillid")
 		call MMD_DefineEvent3("hero_level","{0} {1} {2}","pid","uid","secelapsed")
-		call MMD_DefineEvent3("upgrade_finished","{0} {1} {2}","pid","unit_id","secelapsed")
+		//call MMD_DefineEvent3("upgrade_finished","{0} {1} {2}","pid","unit_id","secelapsed")
 		call MMD_DefineEvent3("research_finished","{0} {1} {2}","pid","researchid","researchlvl:secelapsed")
 		
 		call MMD_DefineValue("race",MMD_TYPE_STRING,MMD_GOAL_NONE,MMD_SUGGEST_NONE)
@@ -107,7 +106,7 @@ library W3GPlus initializer init requires MMD
 		call TriggerAddAction(onHeroLevelUp,function action_onHeroLevelUp)
 		
 		call TriggerRegisterAnyUnitEventBJ(onUpgradeFinished,EVENT_PLAYER_UNIT_UPGRADE_FINISH)
-		call TriggerAddAction(onUpgradeFinished,function action_onUpgradeFinished)
+		//call TriggerAddAction(onUpgradeFinished,function action_onUpgradeFinished)
 		
 		call TriggerRegisterAnyUnitEventBJ(onResearchFinished,EVENT_PLAYER_UNIT_RESEARCH_FINISH)
 		call TriggerAddAction(onResearchFinished,function action_onResearchFinished)		
