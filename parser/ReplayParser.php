@@ -240,7 +240,7 @@ class ReplayParser
             foreach ($team as $player) {
                 $newPlayer = array();
                 $this->playerIdToName[$player["player_id"]] = $player["name"];
-                if (($player["team"] == 12 && $this["version"] <29) || $player["team"] == 24) {
+                if (($player["team"] == 12 && $this->version <29) || $player["team"] == 24) {
                     $observers[] = $player["name"];
                     continue;
                 }
@@ -307,8 +307,10 @@ class ReplayParser
         $return["host"] = $replay_parsed->game["creator"];
         $return["filesize"] = filesize($filepath);
         $return["gameLength"] =  $this::convertTime($replay_parsed->header["length"]);
+        
         $return["version"] = intval(sprintf('%02d', $replay_parsed->header['major_v']));
-        $this["version"] = $return["version"];
+        $this->version = $return["version"];
+        
         $return["nwgOffset"] = intval($replay_parsed->read_offset);
 
         $teamresult = $this::normalizeTeams($replay_parsed->teams, $replay_parsed->apmTimeSampleInterval);
