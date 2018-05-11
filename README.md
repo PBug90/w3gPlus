@@ -1,8 +1,7 @@
 # w3gPlus
 
-** The parser was moved to a separate repository:
-[w3gphp](https://github.com/anXieTyPB/w3gphp)
-**
+**The parser was moved to a separate repository:
+[w3gphp](https://github.com/anXieTyPB/w3gphp)**
 
 ## What?
 
