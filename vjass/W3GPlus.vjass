@@ -37,17 +37,23 @@ library W3GPlus initializer init requires MMD
 	endfunction
 	
 	function action_resourceTimerTimeout takes nothing returns nothing
+		local integer maxPlayerId = bj_MAX_PLAYERS - 1
 		local integer i  = 0
+		local player p = null
+		
 		loop
-			exitwhen i > 11
-			if GetPlayerSlotState(Player(i)) == PLAYER_SLOT_STATE_PLAYING and not IsPlayerObserver(Player(i)) then
-				call MMD_LogEvent3("gold_mined_total",I2S(i),I2S(GetPlayerScore(Player(i),PLAYER_SCORE_GOLD_MINED_TOTAL)),I2S(execution_count))
-				call MMD_LogEvent3("gold_mined_upkeep",I2S(i),I2S(GetPlayerScore(Player(i),PLAYER_SCORE_GOLD_MINED_UPKEEP)),I2S(execution_count))
-				call MMD_LogEvent3("gold_mined_upkeep",I2S(i),I2S(GetPlayerScore(Player(i),PLAYER_SCORE_LUMBER_TOTAL)),I2S(execution_count))
+			exitwhen i > maxPlayerId
+			set p = Player(i)
+			
+			if GetPlayerSlotState(p) == PLAYER_SLOT_STATE_PLAYING and not IsPlayerObserver(p) then
+				call MMD_LogEvent3("gold_mined_total",I2S(i),I2S(GetPlayerScore(p,PLAYER_SCORE_GOLD_MINED_TOTAL)),I2S(execution_count))
+				call MMD_LogEvent3("gold_mined_upkeep",I2S(i),I2S(GetPlayerScore(p,PLAYER_SCORE_GOLD_MINED_UPKEEP)),I2S(execution_count))
+				call MMD_LogEvent3("gold_mined_upkeep",I2S(i),I2S(GetPlayerScore(p,PLAYER_SCORE_LUMBER_TOTAL)),I2S(execution_count))
 			endif
-			set i = i +1
+			set i = i + 1
 		endloop
 		set execution_count = execution_count + 1
+		set p = null
 	endfunction	
 	
 	private function action_increaseElapsedSeconds takes nothing returns nothing
@@ -56,7 +62,12 @@ library W3GPlus initializer init requires MMD
 	
 	//DefineEvent2(name, format, argName1, argName2)
 	private function init2 takes nothing returns nothing
+		local integer maxPlayerId = bj_MAX_PLAYERS - 1
 		local integer i = 0
+		local player p = null
+		local race prace = null
+		local string raceName = ""
+		
 		//call MMD_DefineEvent2("unit_created","{0} {1}","pid","uid")
 		call MMD_DefineEvent3("gold_mined_total","{0} {1}","pid","amount","exec_count")
 		call MMD_DefineEvent3("gold_mined_upkeep","{0} {1}","pid","amount","exec_count")
@@ -68,23 +79,36 @@ library W3GPlus initializer init requires MMD
 		
 		call MMD_DefineValue("race",MMD_TYPE_STRING,MMD_GOAL_NONE,MMD_SUGGEST_NONE)
 		loop
-			exitwhen i > 11
-				if (not IsPlayerObserver(Player(i))) and GetPlayerSlotState(Player(i))==PLAYER_SLOT_STATE_PLAYING then
-					if (GetPlayerRace(Player(i)))==RACE_HUMAN then
-						call MMD_UpdateValueString("race",Player(i),"human")
-					elseif (GetPlayerRace(Player(i)))==RACE_ORC then
-						call MMD_UpdateValueString("race",Player(i),"orc")
-					elseif (GetPlayerRace(Player(i)))==RACE_UNDEAD then
-						call MMD_UpdateValueString("race",Player(i),"undead")
-					elseif (GetPlayerRace(Player(i)))==RACE_NIGHTELF then
-						call MMD_UpdateValueString("race",Player(i),"nightelf")
+			exitwhen i > maxPlayerId
+				set p = Player(i)
+				
+				if (not IsPlayerObserver(p)) and GetPlayerSlotState(p)==PLAYER_SLOT_STATE_PLAYING then
+					set prace = GetPlayerRace(p)
+					
+					if prace==RACE_HUMAN then
+						set raceName = "human"
+					elseif prace==RACE_ORC then
+						set raceName = "orc"
+					elseif prace==RACE_UNDEAD then
+						set raceName = "undead"
+					elseif prace==RACE_NIGHTELF then
+						set raceName = "nightelf"
+					elseif prace==RACE_DEMON then
+						set raceName = "demon"
+					elseif prace==RACE_OTHER then
+						set raceName = "other"
+					else
+						set raceName = "unknown"
 					endif
 				
-					
+					call MMD_UpdateValueString("race",p,raceName)
 				endif
 			
 			set i = i + 1
 		endloop
+		
+		set p = null
+		set prace = null
 	endfunction
 	
 	

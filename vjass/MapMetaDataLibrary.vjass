@@ -200,14 +200,17 @@ library MMD initializer init
    
     ///Returns true for a fixed size uniform random subset of players in the game
     private function isEmitter takes nothing returns boolean
+        local player p = null
         local integer i = 0
         local integer n = 0
         local integer r
         local integer array picks
         local boolean array pick_flags
         loop
-            exitwhen i >= 12
-            if GetPlayerController(Player(i)) == MAP_CONTROL_USER and GetPlayerSlotState(Player(i)) == PLAYER_SLOT_STATE_PLAYING then
+            exitwhen i >= bj_MAX_PLAYERS
+            set p = Player(i)
+            
+            if GetPlayerController(p) == MAP_CONTROL_USER and GetPlayerSlotState(p) == PLAYER_SLOT_STATE_PLAYING then
                 if n < num_senders then //initializing picks
                     set picks[n] = i
                     set pick_flags[i] = true
@@ -223,6 +226,8 @@ library MMD initializer init
             endif
             set i = i + 1
         endloop
+        
+        set p = null
         return pick_flags[GetPlayerId(GetLocalPlayer())]
     endfunction
    
@@ -319,8 +324,8 @@ library MMD initializer init
     ///Updates the value of a defined variable for a given player
     private function update_value takes string name, player p, string op, string value, integer val_type returns nothing
         local integer id = GetPlayerId(p)
-        if p == null or id < 0 or id >= 12 then
-            call BJDebugMsg("MMD Set Error: Invalid player. Must be P1 to P12.")
+        if p == null or id < 0 or id >= bj_MAX_PLAYERS then
+            call BJDebugMsg("MMD Set Error: Invalid player ID=" + I2S(id) + ". Must be 0 to " + I2S(bj_MAX_PLAYERS-1) + ".")
         elseif val_type != GetStoredInteger(gc, "types", name) then
             call BJDebugMsg("MMD Set Error: Updated value of undefined variable or used value of incorrect type.")
         elseif StringLength(op) == 0 then
@@ -361,11 +366,11 @@ library MMD initializer init
     public function FlagPlayer takes player p, integer flag_type returns nothing
         local string flag = flags[flag_type]
         local integer id = GetPlayerId(p)
-        if p == null or id < 0 or id >= 12 then
-            call BJDebugMsg("MMD Flag Error: Invalid player. Must be P1 to P12.")
+        if p == null or id < 0 or id >= bj_MAX_PLAYERS then
+            call BJDebugMsg("MMD Flag Error: Invalid player ID=" + I2S(id) + ". Must be 0 to " + I2S(bj_MAX_PLAYERS-1) + ".")
         elseif StringLength(flag) == 0 then
             call BJDebugMsg("MMD Flag Error: Unrecognized flag type.")
-        elseif GetPlayerController(Player(id)) == MAP_CONTROL_USER then
+        elseif GetPlayerController(p) == MAP_CONTROL_USER then
             call emit("FlagP " + I2S(id) + " " + flag)
         endif
     endfunction
@@ -448,17 +453,20 @@ library MMD initializer init
    
     ///Emits initialization data
     private function init2 takes nothing returns nothing
-        local integer i
-        local trigger t
+        local integer maxPlayerId = bj_MAX_PLAYERS - 1
+        local integer i = 0
+        local player p = null
+        local trigger t = null
         set initialized = true
        
         call emit("init version " + I2S(MINIMUM_PARSER_VERSION) + " " + I2S(CURRENT_VERSION))
 
-        set i = 0
         loop
-            exitwhen i >= 12
-            if GetPlayerController(Player(i)) == MAP_CONTROL_USER and GetPlayerSlotState(Player(i)) == PLAYER_SLOT_STATE_PLAYING then
-                call emit("init pid " + I2S(i) + " " + pack(GetPlayerName(Player(i))))
+            exitwhen i > maxPlayerId
+            set p = Player(i)
+            
+            if GetPlayerController(p) == MAP_CONTROL_USER and GetPlayerSlotState(p) == PLAYER_SLOT_STATE_PLAYING then
+                call emit("init pid " + I2S(i) + " " + pack(GetPlayerName(p)))
             endif
             set i = i + 1
         endloop
@@ -466,6 +474,8 @@ library MMD initializer init
         set t = CreateTrigger()
         call TriggerAddAction(t, function tick)
         call TriggerRegisterTimerEvent(t, 0.37, true)
+        
+        set p = null
     endfunction
    
     ///Places init2 on a timer, initializes game cache, and translates constants
